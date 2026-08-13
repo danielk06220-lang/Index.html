@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Envoyer mes coordonnées</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f6f6f6; padding:30px; }
+    .container { max-width:520px; margin:auto; background:#fff; padding:24px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+    h1 { text-align:center; font-size:20px; }
+    p { margin:12px 0; color:#333; }
+    a, button { display:block; width:100%; text-align:center; padding:12px; border-radius:6px; text-decoration:none; color:#fff; background:#1a73e8; border:none; font-size:16px; cursor:pointer; }
+    a:hover, button:hover { background:#1558b0; }
+    .note { font-size:13px; color:#555; margin-top:12px; }
+  </style>
+</head>
+<body>
+  <div class="container" role="region" aria-labelledby="title">
+    <h1 id="title">Envoyer mes coordonnées</h1>
+    <p>Cliquez sur le lien ou le bouton ci‑dessous pour ouvrir votre client mail et envoyer vos informations à Daniel.</p>
+
+    <a id="mailto-link" href="mailto:daniel.k06220@gmail.com?subject=Mes%20coordonn%C3%A9es%20-%20accord%20de%20partage&amp;body=Bonjour%20Daniel%2C%0A%0AVoici%20mes%20informations%20comme%20convenu%20%3A%0A%0ANom%20complet%20%3A%20Marion%20ortiz%0AAdresse%20e-mail%20%3A%20marionortiz06%40outlouk.fr%0ANum%C3%A9ro%20de%20t%C3%A9l%C3%A9phone%20%3A%200650251606%0ASite%20%28optionnel%29%20%3A%20%0A%0AJe%20consens%20volontairement%20%C3%A0%20partager%20les%20informations%20ci-dessus%20avec%20Daniel%20pour%20la%20finalit%C3%A9%20indiqu%C3%A9e.%0A%0ACordialement%2C%0AMarion">Ouvrir le client mail</a>
+
+    <button type="button" onclick="window.location.href=document.getElementById('mailto-link').href">
+      Ouvrir le client mail
+    </button>
+
+    <p class="note">Remplis les champs dans le corps du mail et envoie‑le — c'est la façon la plus simple et respectueuse pour partager les données.</p>
+  </div>
+</body>
+</html>
