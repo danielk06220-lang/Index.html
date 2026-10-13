@@ -1,397 +1,169 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Confirmetonacces - Envoi de fichiers</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Confirme ton accès</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       margin: 0;
       padding: 20px;
-      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      box-sizing: border-box;
+      display: grid;
+      place-items: center;
       background: #f1f5f9;
-      color: #1e293b;
+      font-family: Arial, sans-serif;
+      color: #172033;
     }
-
-    .container {
-      width: 100%;
-      max-width: 520px;
-      margin: 40px auto;
-      padding: 28px;
+    main {
       background: white;
-      border-radius: 14px;
-      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+      width: 100%;
+      max-width: 430px;
+      padding: 24px;
+      box-sizing: border-box;
+      border-radius: 16px;
+      box-shadow: 0 5px 25px #0001;
     }
-
-    h1 {
-      text-align: center;
-      font-size: 26px;
-      margin-top: 0;
-    }
-
-    p {
-      line-height: 1.5;
-    }
-
-    label {
-      display: block;
-      margin-top: 16px;
-      margin-bottom: 7px;
-      font-weight: bold;
-    }
-
-    input {
+    h1 { text-align: center; }
+    p { line-height: 1.5; }
+    button, .choose {
       display: block;
       width: 100%;
-      padding: 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      font-size: 15px;
+      padding: 14px;
+      border: 0;
+      border-radius: 9px;
+      font-size: 16px;
+      margin-top: 14px;
+      box-sizing: border-box;
     }
-
     button {
-      width: 100%;
-      margin-top: 18px;
-      padding: 13px;
-      border: none;
-      border-radius: 8px;
       background: #2563eb;
       color: white;
-      font-size: 16px;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .45; }
+    .choose {
+      background: #e8efff;
+      color: #1d4ed8;
+      text-align: center;
       font-weight: bold;
       cursor: pointer;
     }
-
-    button:hover {
-      background: #1d4ed8;
-    }
-
-    button:disabled {
-      opacity: 0.6;
-      cursor: wait;
-    }
-
-    .secondary {
-      background: #64748b;
-    }
-
-    #uploadSection {
-      display: none;
-    }
-
-    #status {
-      margin-top: 18px;
-      overflow-wrap: anywhere;
-      white-space: pre-wrap;
-    }
-
-    .note {
-      font-size: 13px;
-      color: #64748b;
-    }
+    #status { overflow-wrap: anywhere; }
+    [hidden] { display: none !important; }
   </style>
 </head>
-
 <body>
-  <main class="container">
-    <h1>Confirmetonacces</h1>
-    <p>Connecte-toi pour envoyer tes fichiers.</p>
+<main>
+  <h1>Confirme ton accès</h1>
+  <p>
+    Tu peux partager plusieurs photos, vidéos et documents.
+    Lis les conditions avant de continuer.
+  </p>
+  <p>
+    Tu choisis les fichiers à transmettre et confirmes leur envoi.
+    L'acceptation seule ne donne pas accès aux fichiers du téléphone.
+  </p>
 
-    <section id="loginSection">
-      <form id="loginForm">
-        <label for="email">Adresse e-mail</label>
-        <input
-          id="email"
-          type="email"
-          autocomplete="username"
-          required
-          placeholder="Ton adresse e-mail"
-        >
+  <label>
+    <input type="checkbox" id="accord">
+    J'ai lu et j'accepte les conditions de partage.
+  </label>
 
-        <label for="password">Mot de passe</label>
-        <input
-          id="password"
-          type="password"
-          autocomplete="current-password"
-          required
-          placeholder="Ton mot de passe"
-        >
+  <section id="partage" hidden>
+    <label class="choose" for="fichiers">
+      Choisir plusieurs fichiers
+    </label>
+    <input id="fichiers" type="file" multiple hidden>
+    <p id="liste">Aucun fichier sélectionné.</p>
+    <button id="envoyer" disabled>Confirmer l'envoi</button>
+  </section>
 
-        <button id="loginButton" type="submit">
-          Se connecter
-        </button>
-      </form>
-    </section>
+  <p id="status" role="status" aria-live="polite"></p>
+</main>
 
-    <section id="uploadSection">
-      <p id="userInfo"></p>
+<script>
+  // Projet Supabase
+  const SUPABASE_URL =
+    "https://hbpijtddguzqcfikhzde.supabase.co";
 
-      <form id="uploadForm">
-        <label for="folderName">Nom du dossier</label>
-        <input
-          id="folderName"
-          type="text"
-          maxlength="60"
-          required
-          placeholder="Exemple : documents_2026"
-        >
+  const SUPABASE_KEY =
+    "sb_publishable_ix6RvrM1ActTBEg97AluTw_dF9OkXey";
 
-        <label for="files">Choisir les fichiers</label>
-        <input id="files" type="file" multiple required>
+  // À créer et sécuriser côté Supabase avant l'envoi réel.
+  const UPLOAD_ENDPOINT =
+    SUPABASE_URL + "/functions/v1/create-upload";
 
-        <p class="note">
-          Limite de cette page : 20 Mo par fichier.
-        </p>
+  const accord = document.getElementById("accord");
+  const partage = document.getElementById("partage");
+  const fichiers = document.getElementById("fichiers");
+  const liste = document.getElementById("liste");
+  const envoyer = document.getElementById("envoyer");
+  const status = document.getElementById("status");
 
-        <button id="uploadButton" type="submit">
-          Envoyer les fichiers
-        </button>
-      </form>
+  accord.addEventListener("change", () => {
+    partage.hidden = !accord.checked;
+  });
 
-      <button id="logoutButton" class="secondary" type="button">
-        Se déconnecter
-      </button>
-    </section>
+  fichiers.addEventListener("change", () => {
+    const selection = Array.from(fichiers.files);
+    const tailleMax = 20 * 1024 * 1024;
+    const valide = selection.length > 0 &&
+      selection.length <= 20 &&
+      selection.every(f => f.size <= tailleMax);
 
-    <div id="status" role="status" aria-live="polite"></div>
-  </main>
+    liste.textContent = selection.length
+      ? selection.length + " fichier(s) sélectionné(s)"
+      : "Aucun fichier sélectionné.";
 
-  <script>
-    // CONFIGURATION SUPABASE
-    const SUPABASE_URL =
-      "https://hbpijtddguzqcfikhzde.supabase.co";
+    envoyer.disabled = !valide;
+    status.textContent = selection.length && !valide
+      ? "Choisis au maximum 20 fichiers de 20 Mo chacun."
+      : "";
+  });
 
-    const SUPABASE_KEY =
-      "sb_publishable_ix6RvrM1ActTBEg97AluTw_dF9OkXey";
+  envoyer.addEventListener("click", async () => {
+    const selection = Array.from(fichiers.files);
+    if (!accord.checked || !selection.length) return;
 
-    const BUCKET = "Confirmetonacces";
-    const MAX_FILE_SIZE = 20 * 1024 * 1024;
+    envoyer.disabled = true;
+    status.textContent =
+      "L'envoi réel nécessite la configuration de la fonction sécurisée Supabase.";
 
-    const supabaseClient = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
-    );
+    try {
+      // Cette fonction doit être créée côté serveur.
+      // Elle ne doit autoriser que des envois limités et contrôlés.
+      const reponse = await fetch(UPLOAD_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY
+        },
+        body: JSON.stringify({
+          files: selection.map(f => ({
+            name: f.name,
+            size: f.size,
+            type: f.type || "application/octet-stream"
+          }))
+        })
+      });
 
-    const loginSection = document.getElementById("loginSection");
-    const uploadSection = document.getElementById("uploadSection");
-    const loginForm = document.getElementById("loginForm");
-    const uploadForm = document.getElementById("uploadForm");
-    const statusBox = document.getElementById("status");
-    const loginButton = document.getElementById("loginButton");
-    const uploadButton = document.getElementById("uploadButton");
-
-    let currentUser = null;
-
-    function showStatus(message, isError = false) {
-      statusBox.textContent = message;
-      statusBox.style.color = isError ? "#b91c1c" : "#15803d";
-    }
-
-    function cleanFolderName(value) {
-      return value
-        .trim()
-        .normalize("NFKD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-zA-Z0-9_-]/g, "_")
-        .replace(/_+/g, "_")
-        .slice(0, 60);
-    }
-
-    function displayLoggedInUser(user) {
-      currentUser = user;
-      loginSection.style.display = "none";
-      uploadSection.style.display = "block";
-
-      document.getElementById("userInfo").textContent =
-        "Connecté : " + (user.email || "utilisateur");
-
-      showStatus("");
-    }
-
-    function displayLoggedOut() {
-      currentUser = null;
-      loginSection.style.display = "block";
-      uploadSection.style.display = "none";
-    }
-
-    // CONNEXION
-    loginForm.addEventListener("submit", async function (event) {
-      event.preventDefault();
-
-      loginButton.disabled = true;
-      showStatus("Connexion en cours...");
-
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-
-      try {
-        const { data, error } =
-          await supabaseClient.auth.signInWithPassword({
-            email,
-            password
-          });
-
-        if (error) {
-          showStatus(
-            "Connexion impossible : " + error.message +
-            "\nVérifie ton compte dans Supabase Authentication.",
-            true
-          );
-          return;
-        }
-
-        displayLoggedInUser(data.user);
-      } catch (error) {
-        showStatus("Erreur : " + error.message, true);
-      } finally {
-        loginButton.disabled = false;
-      }
-    });
-
-    // ENVOI DES FICHIERS
-    uploadForm.addEventListener("submit", async function (event) {
-      event.preventDefault();
-
-      if (!currentUser) {
-        showStatus("Connecte-toi avant d'envoyer des fichiers.", true);
-        return;
-      }
-
-      const fileInput = document.getElementById("files");
-      const selectedFiles = Array.from(fileInput.files);
-
-      const folder = cleanFolderName(
-        document.getElementById("folderName").value
-      );
-
-      if (!folder) {
-        showStatus("Saisis un nom de dossier valide.", true);
-        return;
-      }
-
-      if (selectedFiles.length === 0) {
-        showStatus("Choisis au moins un fichier.", true);
-        return;
-      }
-
-      const oversizedFile = selectedFiles.find(
-        file => file.size > MAX_FILE_SIZE
-      );
-
-      if (oversizedFile) {
-        showStatus(
-          "Le fichier " + oversizedFile.name +
-          " dépasse la limite de 20 Mo.",
-          true
+      if (!reponse.ok) {
+        throw new Error(
+          "La fonction d'envoi Supabase n'est pas encore configurée."
         );
-        return;
       }
 
-      uploadButton.disabled = true;
-      uploadButton.textContent = "Envoi en cours...";
-
-      let successCount = 0;
-      const errors = [];
-
-      try {
-        for (const file of selectedFiles) {
-          const safeName = file.name.replace(/[\\/]/g, "_");
-          const uniqueName =
-            crypto.randomUUID() + "-" + safeName;
-
-          // Structure : identifiant utilisateur / dossier / fichier
-          const path =
-            currentUser.id + "/" + folder + "/" + uniqueName;
-
-          showStatus(
-            "Envoi de " + (successCount + errors.length + 1) +
-            "/" + selectedFiles.length + " : " + file.name
-          );
-
-          const { error } = await supabaseClient.storage
-            .from(BUCKET)
-            .upload(path, file, {
-              upsert: false
-            });
-
-          if (error) {
-            errors.push(file.name + " : " + error.message);
-          } else {
-            successCount++;
-          }
-        }
-
-        let message =
-          successCount + " fichier(s) envoyé(s) avec succès.";
-
-        if (errors.length > 0) {
-          message += "\n\nFichiers non envoyés :\n" +
-            errors.join("\n");
-
-          showStatus(message, true);
-        } else {
-          showStatus(message);
-          uploadForm.reset();
-        }
-      } catch (error) {
-        showStatus(
-          "Une erreur est survenue : " + error.message,
-          true
-        );
-      } finally {
-        uploadButton.disabled = false;
-        uploadButton.textContent = "Envoyer les fichiers";
-      }
-    });
-
-    // DÉCONNEXION
-    document.getElementById("logoutButton").addEventListener(
-      "click",
-      async function () {
-        const { error } = await supabaseClient.auth.signOut();
-
-        if (error) {
-          showStatus(
-            "Erreur de déconnexion : " + error.message,
-            true
-          );
-          return;
-        }
-
-        displayLoggedOut();
-        showStatus("Tu es déconnecté.");
-      }
-    );
-
-    // VÉRIFICATION DE LA SESSION
-    async function startApp() {
-      try {
-        const { data, error } =
-          await supabaseClient.auth.getSession();
-
-        if (error) {
-          showStatus("Erreur de session : " + error.message, true);
-          return;
-        }
-
-        if (data.session) {
-          displayLoggedInUser(data.session.user);
-        } else {
-          displayLoggedOut();
-        }
-      } catch (error) {
-        showStatus("Erreur de démarrage : " + error.message, true);
-      }
+      status.textContent =
+        "Autorisation obtenue. Il reste à configurer le transfert sécurisé.";
+    } catch (e) {
+      status.textContent = e.message;
+    } finally {
+      envoyer.disabled = false;
     }
-
-    startApp();
-  </script>
+  });
+</script>
 </body>
 </html>
